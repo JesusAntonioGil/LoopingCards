@@ -10,6 +10,7 @@ import SwiftUI
 
 struct LoopingStack<Content: View>: View {
     var visibleCardsCount: Int = 2
+    var maxTranslationWidth: CGFloat?
     @ViewBuilder var content: Content
     @State private var rotation: Int = 0
     
@@ -23,7 +24,12 @@ struct LoopingStack<Content: View>: View {
                     let index = collection.index(view)
                     let zIndex = Double(count - index)
                     
-                    LoopingStackCardView(index: index, count: count, visibleCardsCount: visibleCardsCount, rotation: $rotation) {
+                    LoopingStackCardView(index: index,
+                                         count: count,
+                                         visibleCardsCount: visibleCardsCount,
+                                         maxTranslationWidth:
+                                            maxTranslationWidth,
+                                         rotation: $rotation) {
                         view
                     }
                     .zIndex(zIndex)
@@ -38,6 +44,7 @@ fileprivate struct LoopingStackCardView<Content: View>: View {
     var index: Int
     var count: Int
     var visibleCardsCount: Int
+    var maxTranslationWidth: CGFloat?
     @Binding var rotation: Int
     @ViewBuilder var content: Content
     @State private var offset: CGFloat = .zero
@@ -66,7 +73,12 @@ fileprivate struct LoopingStackCardView<Content: View>: View {
                 DragGesture()
                     .onChanged { value in
                         let xOffset = -max(-value.translation.width, 0)
-                        offset = xOffset
+                        if let maxTranslationWidth {
+                            let progress = -max(-min(xOffset / maxTranslationWidth, 1), 0) * viewSize.width
+                            offset = progress
+                        } else {
+                            offset = xOffset
+                        }
                     } .onEnded { value in
                         let xVelocity = max(-value.translation.width / 5, 0)
                         
@@ -99,6 +111,7 @@ fileprivate struct LoopingStackCardView<Content: View>: View {
 
 extension SubviewsCollection {
     func rotateFromLeft(by: Int) -> [SubviewsCollection.Element] {
+        guard !isEmpty else { return [] }
         let moveIndex = by % count
         let rotatedElements = Array(self[moveIndex...]) + Array(self[0..<moveIndex])
         return rotatedElements

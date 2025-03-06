@@ -15,12 +15,12 @@ struct ContentView: View {
                 GeometryReader {
                     let width = $0.size.width
                     
-                    LoopingStack {
+                    LoopingStack(maxTranslationWidth: width) {
                         ForEach(images) { image in
                             Image(image.image)
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
-                                .frame(width: 100, height: 100)
+                                .frame(width: 250, height: 400)
                                 .clipShape(.rect(cornerRadius: 30))
                                 .padding(5)
                                 .background {
@@ -31,7 +31,7 @@ struct ContentView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .frame(height: 120)
+                .frame(height: 420)
             }
             .navigationTitle("Looping Stack")
             .frame(maxWidth: .infinity, maxHeight: .infinity)
